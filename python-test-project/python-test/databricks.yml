@@ -1,0 +1,44 @@
+# Declarative Automation Bundle configuration, more info here: https://docs.databricks.com/en/dev-tools/bundles/settings.html
+bundle:
+  name: "python-test"
+
+include:
+  - resources/*.yml
+  - resources/*/*.yml
+
+variables:
+  catalog:
+    description: "Unity Catalog catalog that deployed resources use."
+    default: "main"
+  schema:
+    description: "Unity Catalog schema that deployed resources use."
+    default: "default"
+  warehouse_id:
+    description: "ID of the SQL warehouse used by SQL tasks and dashboards."
+    default: ""
+
+targets:
+  # The 'dev' target, for development purposes. This target is the default.
+  dev:
+    mode: development
+    default: true
+    variables:
+      # Override defaults per environment, e.g. use a separate dev schema.
+      schema: "default"
+    workspace:
+      host: https://dbc-eae078b4-b9a0.cloud.databricks.com
+
+  # The 'prod' target, used for production deployment.
+  prod:
+    mode: production
+    variables:
+      # Override defaults per environment, e.g. use a separate prod schema.
+      schema: "default"
+    workspace:
+      host: https://dbc-eae078b4-b9a0.cloud.databricks.com
+      # We always use /Users/andy.mccall896@gmail.com for all resources to make sure we only have a single copy.
+      root_path: /Users/andy.mccall896@gmail.com/.bundle/${bundle.name}/${bundle.target}
+    run_as:
+      # This runs as andy.mccall896@gmail.com in production. We could also use a service principal here,
+      # see https://docs.databricks.com/dev-tools/bundles/permissions.html.
+      user_name: andy.mccall896@gmail.com
